@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const [status, setStatus] = useState(
@@ -8,6 +8,48 @@ export default function Home() {
   );
   const [listening, setListening] = useState(false);
   const [result, setResult] = useState(null);
+  const [history, setHistory] = useState([]);
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem("songFinderHistory") || "[]");
+      setHistory(saved);
+    } catch {
+      setHistory([]);
+    }
+  }, []);
+
+  function saveSong(song) {
+    const newSong = {
+      title: song.title,
+      artist: song.artist,
+      album: song.album || "",
+      song_link: song.song_link || "",
+      foundAt: Date.now(),
+    };
+
+    setHistory((current) => {
+      // Remove an older copy if the same song was already identified.
+      const withoutDuplicate = current.filter(
+        (item) =>
+          !(
+            item.title?.toLowerCase() === newSong.title?.toLowerCase() &&
+            item.artist?.toLowerCase() === newSong.artist?.toLowerCase()
+          )
+      );
+
+      // Keep only the 10 most recent songs.
+      const updated = [newSong, ...withoutDuplicate].slice(0, 10);
+
+      localStorage.setItem("songFinderHistory", JSON.stringify(updated));
+      return updated;
+    });
+  }
+
+  function clearHistory() {
+    localStorage.removeItem("songFinderHistory");
+    setHistory([]);
+  }
 
   async function identify() {
     setResult(null);
@@ -40,12 +82,15 @@ export default function Home() {
 
           const data = await response.json();
 
-          if (!response.ok) throw new Error(data.error);
+          if (!response.ok) {
+            throw new Error(data.error || "Recognition failed.");
+          }
 
           if (!data.result) {
             setStatus("No match found. Try again closer to the music.");
           } else {
             setResult(data.result);
+            saveSong(data.result);
             setStatus("Found it!");
           }
         } catch {
@@ -85,13 +130,50 @@ export default function Home() {
           <div className="result">
             <h2>{result.title}</h2>
             <p>{result.artist}</p>
+
             {result.album && <small>{result.album}</small>}
 
             {result.song_link && (
-              <a href={result.song_link} target="_blank">
+              <a
+                href={result.song_link}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 Open Song
               </a>
             )}
+          </div>
+        )}
+
+        {history.length > 0 && (
+          <div className="history">
+            <div className="historyHeader">
+              <h2>Recent Songs</h2>
+
+              <button className="clearButton" onClick={clearHistory}>
+                Clear
+              </button>
+            </div>
+
+            {history.map((song, index) => (
+              <div className="historySong" key={`${song.title}-${song.artist}-${index}`}>
+                {song.song_link ? (
+                  <a
+                    href={song.song_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <strong>{song.title}</strong>
+                    <span>{song.artist}</span>
+                  </a>
+                ) : (
+                  <>
+                    <strong>{song.title}</strong>
+                    <span>{song.artist}</span>
+                  </>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </div>
