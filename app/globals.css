@@ -74,3 +74,72 @@ button:disabled {
   color: white;
   text-decoration: none;
 }
+.history {
+  margin-top: 30px;
+  text-align: left;
+  border-top: 1px solid #292c33;
+  padding-top: 22px;
+}
+
+.historyHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.historyHeader h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.clearButton {
+  width: auto;
+  margin: 0;
+  padding: 7px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  background: #252932;
+  color: #aeb4bf;
+}
+
+.historySong {
+  border-bottom: 1px solid #252932;
+}
+
+.historySong:last-child {
+  border-bottom: none;
+}
+
+.historySong a,
+.historySong > span,
+.historySong > strong {
+  text-decoration: none;
+  color: inherit;
+}
+
+.historySong a {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 2px;
+}
+
+.historySong > strong {
+  display: block;
+  padding-top: 14px;
+}
+
+.historySong > span {
+  display: block;
+  padding: 4px 0 14px;
+}
+
+.historySong strong {
+  font-size: 15px;
+}
+
+.historySong span {
+  color: #8f96a3;
+  font-size: 13px;
+}
